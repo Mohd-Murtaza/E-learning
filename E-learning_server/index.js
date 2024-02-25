@@ -2,7 +2,10 @@ require("dotenv").config();
 const PORT=process.env.PORT;
 const express=require("express");
 const {connection} = require("./config/db");
+const { userRouter } = require("./routes/user.route");
 const app=express();
+
+app.use("/users",userRouter);
 
 app.get("/", (req,res)=>{
     res.status(200).send("This is a home page")
