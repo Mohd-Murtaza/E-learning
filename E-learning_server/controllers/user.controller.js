@@ -20,7 +20,7 @@ const userLogin=async(req,res)=>{
         }
         //if password is correct than we have to generate access_token and refresh_token
         const accesstoken=await UserModel.generateAccessToken();
-        const refreshtoken=await UserModel.generateAccessToken();
+        const refreshtoken=await UserModel.generateRefreshToken();
 
         res.cookie("accesstoken",accesstoken,cookiesOption);
         res.cookie("refreshtoken",refreshtoken,cookiesOption);
