@@ -17,7 +17,8 @@ const userRegister = async (req, res) => {
     }
 
     // Check if the password meets the specified criteria means password should have one uppercase character,one number,one special character, and the length of password should be at least 8 characters long
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&+]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&+]{8,}$/;
     if (!passwordRegex.test(password)) {
       return res
         .status(400)
@@ -48,8 +49,8 @@ const userRegister = async (req, res) => {
     });
     await newUser.save();
 
-    const subject=`Welcome to E-learning - Your Registration OTP Inside`;
-    const text=`Dear ${name},
+    const subject = `Welcome to E-learning - Your Registration OTP Inside`;
+    const text = `Dear ${name},
 
     Thank you for choosing E-learning for your educational journey.
     
@@ -62,7 +63,7 @@ const userRegister = async (req, res) => {
     E-learning`;
 
     // Send OTP via email
-    sendEmail(email,subject,text)
+    sendEmail(email, subject, text);
 
     return res
       .status(201)
@@ -100,7 +101,9 @@ const userVerifyOTP = async (req, res) => {
       return res.status(400).send({ status: "fail", message: "Incorrect OTP" });
     }
 
-    await UserModel.findByIdAndUpdate((userCheckIsExist._id),{$set:{emailVerified : true}});
+    await UserModel.findByIdAndUpdate(userCheckIsExist._id, {
+      $set: { emailVerified: true },
+    });
 
     return res.status(200).send({
       status: "success",
@@ -116,19 +119,27 @@ const userVerifyOTP = async (req, res) => {
 };
 const userResendOTP = async (req, res) => {
   try {
-    const {email}=req.body;
+    const { email } = req.body;
 
     // Generate 6 digit OTP
     const otpCode = otpGenerator();
 
     // Set expiration time for OTP (5 minutes from now)
-    const otpExpirationTime = otpExpiration(5)
+    const otpExpirationTime = otpExpiration(5);
 
-    await UserModel.findOneAndUpdate({email:email}, {$set:{"otp.otpCode": otpCode, "otp.otpExpirationTime": otpExpirationTime}});
+    await UserModel.findOneAndUpdate(
+      { email: email },
+      {
+        $set: {
+          "otp.otpCode": otpCode,
+          "otp.otpExpirationTime": otpExpirationTime,
+        },
+      }
+    );
 
     // Send OTP via email
-    const subject=`Important: Your New OTP for E-learning Registration`;
-    const text=`Hi Dear,
+    const subject = `Important: Your New OTP for E-learning Registration`;
+    const text = `Hi Dear,
 
     We hope this message finds you well.
     
@@ -146,13 +157,13 @@ const userResendOTP = async (req, res) => {
     Mohd Murtaza
     E-learning`;
 
-    sendEmail(email,subject,text);
+    sendEmail(email, subject, text);
 
     return res
       .status(201)
       .send({ status: "success", msg: "OTP sent successfully" });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).send({
       status: "error",
       message: "Error while resending OTP",
@@ -160,10 +171,6 @@ const userResendOTP = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 const userLogin = async (req, res) => {
   try {
@@ -179,6 +186,15 @@ const userLogin = async (req, res) => {
       return res
         .status(401)
         .send({ msg: "you have to put your email that you register" });
+    }
+
+    //verifying user is registered and their otp is verified is true or false
+    if (!findUserWithMail.emailVerified) {
+      return res
+        .status(401)
+        .send({
+          msg: "Your registration process is not completed. Verify your email with help of OTP verification process.",
+        });
     }
     //if email is ok ( password checking )
     const passwordChecking = await UserModel.comparePassword(password);
