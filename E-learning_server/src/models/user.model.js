@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
 dotenv.config();
+const SALT_ROUNDS=parseInt(process.env.SALT_ROUNDS)
+
 
 const userSchema = mongoose.Schema(
   {
@@ -19,19 +21,31 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    emailVerified:{
+      type:Boolean,
+      default:false
+    },
+    otp: {
+      otpCode: {
+        type: String,
+      },
+      otpExpirationTime: {
+        type: Date,
+      },
+    },
   },
   { versionKey: false }
 );
 const UserModel = mongoose.model("User", userSchema);
 
-//hashed password before save in database with the help od pre hooks
+//hashed password before save in database with the help of pre hooks
 
 userSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) return next();
     const hashedPassword = await bcrypt.hash(
       this.password,
-      process.env.SALT_ROUNDS
+      SALT_ROUNDS
     );
     this.password = hashedPassword;
     next();
