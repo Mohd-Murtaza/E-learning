@@ -22,6 +22,11 @@ app.use((req,res)=>{
     res.status(404).send("this is a invalid request");
 });
 
+// git intigration understandig purpose you can try  use(localhost:8080/login  in your browser)
+// app.get("/login", (req, res) => {
+//     res.sendFile(__dirname + "/index.html");
+// });
+
 app.listen(PORT, ()=>{
     connection.then((res)=>console.log(`db is connected`)).catch((err)=>console.log(err))
     console.log(`server is runngin on this => ${PORT}`)
