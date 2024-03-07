@@ -308,12 +308,10 @@ const gitRegistration = async (req, res) => {
       await newUser.save();
 
       // Send a success message for the new user creation
-      return res
-        .status(201)
-        .send({
-          status: "success",
-          message: "New user is created with the help of GitHub authorization",
-        });
+      return res.status(201).send({
+        status: "success",
+        message: "New user is created with the help of GitHub authorization",
+      });
     }
   } catch (error) {
     // Handle errors during the GitHub OAuth process
@@ -322,8 +320,109 @@ const gitRegistration = async (req, res) => {
   }
 };
 
+// Reset password logic
+const resetPassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword, email } = req.body;
+    const findUserForResetPassword = await UserModel.findOne({ email });
 
+    if (!findUserForResetPassword) {
+      return res.status(401).send({ status: "fail", msg: "User not found" });
+    }
 
+    const oldPasswordValidation =
+      await findUserForResetPassword.comparePassword(oldPassword);
+
+    if (!oldPasswordValidation) {
+      return res
+        .status(401)
+        .send({ status: "fail", msg: "Your old password is incorrect" });
+    }
+
+    findUserForResetPassword.password = newPassword;
+    await findUserForResetPassword.save({ validateBeforeSave: false });
+    res
+      .status(201)
+      .send({ status: "success", msg: "Your password changed successfully" });
+  } catch (error) {
+    res.status(400).send({ status: "fail", msg: error.message });
+  }
+};
+
+// to set user otp for forget password
+
+// send otp to user for forget password
+
+const requestForOtpToForgetPass = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const findUserWithThisEmail = await UserModel.findOne({ email });
+    if (!findUserWithThisEmail) {
+      return res
+        .status(400)
+        .send({ status: "fail", msg: "User not found by this email" });
+    }
+
+    //now generate otp
+    const otpCode = otpGenerator();
+    // here update otp in user document also
+    const otpExpirationTime = otpExpiration(5);
+
+    await UserModel.findOneAndUpdate(
+      { email: email },
+      {
+        $set: {
+          "otp.otpCode": otpCode,
+          "otp.otpExpirationTime": otpExpirationTime,
+        },
+      }
+    );
+    
+
+    const subject = `Important: Your New OTP for E-learning forget password`;
+
+    const text = `Hi Dear,
+
+    We hope this message finds you well.
+    
+    Due to the expiration of your previous OTP, we have generated a new one for you to complete your forget password process on E-learning. Please find your new OTP below:
+    
+    New OTP: ${otpCode}
+    
+    Please note that this OTP is valid for the next 5 minutes. We kindly ask you to use it promptly to ensure a seamless forget password experience.
+    
+    If you encounter any issues or have any questions, please don't hesitate to contact our support team.
+    
+    Thank you for choosing E-learning for your learning journey.
+    
+    Best Regards,
+    E-learning`;
+
+    sendEmail(email, subject, text);
+    res.status(201).send({ status: "success", msg: "opt send " });
+  } catch (error) {
+    res.status(200).send({ status: "fail", msg: error.message });
+  }
+};
+
+// now finally update user password
+
+const forgetPassword = async (req, res) => {
+  try {
+    const { newPassword, email } = req.body;
+    const findUserWithEmail = await UserModel.findOne({ email });
+    if (!findUserWithEmail) {
+      return res.status(400).send({ status: "fail", msg: "User not found" });
+    }
+    findUserWithEmail.password = newPassword;
+    await findUserWithEmail.save();
+    res
+      .status(201)
+      .send({ status: "success", msg: "Password forget successfully" });
+  } catch (error) {
+    res.status(200).send({ status: "fail", msg: error.message });
+  }
+};
 
 module.exports = {
   userLogin,
@@ -331,4 +430,7 @@ module.exports = {
   userVerifyOTP,
   userResendOTP,
   gitRegistration,
+  resetPassword,
+  requestForOtpToForgetPass,
+  forgetPassword,
 };
