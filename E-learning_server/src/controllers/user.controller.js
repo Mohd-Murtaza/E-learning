@@ -196,13 +196,13 @@ const userLogin = async (req, res) => {
       });
     }
     //if email is ok ( password checking )
-    const passwordChecking = await UserModel.comparePassword(password);
+    const passwordChecking = await findUserWithMail.comparePassword(password);
     if (!passwordChecking) {
       return res.status(401).send({ msg: "your password is wrong" });
     }
     //if password is correct than we have to generate access_token and refresh_token
-    const accesstoken = await UserModel.generateAccessToken();
-    const refreshtoken = await UserModel.generateRefreshToken();
+    const accesstoken = await findUserWithMail.generateAccessToken();
+    const refreshtoken = await findUserWithMail.generateRefreshToken();
 
     res.cookie("accesstoken", accesstoken, cookiesOption);
     res.cookie("refreshtoken", refreshtoken, cookiesOption);
