@@ -46,16 +46,10 @@ app.get("/google/failure", (req, res) => {
   res.send("google o auth failed");
 });
 
-//Google Oauth ends here
-
-app.use((req, res) => {
-  res.status(404).send("this is a invalid request");
-});
-
 // git intigration understandig purpose you can try  use(localhost:8080/login  in your browser)
-// app.get("/login", (req, res) => {
-//     res.sendFile(__dirname + "/index.html");
-// });
+app.get("/login", (req, res) => {
+    res.sendFile(__dirname + "/index.html");
+});
 
 app.listen(PORT, () => {
   connection

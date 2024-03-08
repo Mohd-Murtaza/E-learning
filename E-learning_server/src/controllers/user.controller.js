@@ -223,6 +223,12 @@ const gitRegistration = async (req, res) => {
   const { code } = req.query;
   console.log("code :" + code);
 
+  const cookiesOption = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  };
+
   try {
     // Exchange the received code for an access token using GitHub API
     const accessToken = await fetch(
@@ -290,7 +296,16 @@ const gitRegistration = async (req, res) => {
     // Generate a random password (consider using a more secure method for real applications)
     const generatedPass = uuidv4();
 
+ 
     if (alreadyUser) {
+
+      //setCookie-login
+    const accesstokenInGit = await alreadyUser.generateAccessToken();
+    const refreshtokenInGit = await alreadyUser.generateRefreshToken();
+
+    res.cookie("accesstoken", accesstokenInGit, cookiesOption);
+    res.cookie("refreshtoken", refreshtokenInGit, cookiesOption);
+
       // If the user already exists, send a success message
       return res
         .status(200)
@@ -307,6 +322,12 @@ const gitRegistration = async (req, res) => {
       // Save the new user in the database
       await newUser.save();
 
+       //setCookie-login
+    const accesstokenInGit = await newUser.generateAccessToken();
+    const refreshtokenInGit = await newUser.generateRefreshToken();
+
+    res.cookie("accesstoken", accesstokenInGit, cookiesOption);
+    res.cookie("refreshtoken", refreshtokenInGit, cookiesOption);
       // Send a success message for the new user creation
       return res.status(201).send({
         status: "success",
