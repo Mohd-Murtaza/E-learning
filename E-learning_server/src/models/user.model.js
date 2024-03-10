@@ -55,7 +55,6 @@ userSchema.methods.comparePassword = async function (password) {
 };
 
 //creating a jwt access token for authorization
-
 userSchema.methods.generateAccessToken = async function () {
   return jwt.sign(
     {
