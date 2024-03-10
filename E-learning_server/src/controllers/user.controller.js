@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { BlackListModel } = require("../models/blackList.model");
 const { UserModel } = require("../models/user.model");
 const { otpExpiration } = require("../utils/otpExpiration.utils");
 const { otpGenerator } = require("../utils/otpGenerator.utils");
@@ -218,6 +219,29 @@ const userLogin = async (req, res) => {
   }
 };
 
+// user logout
+
+const userLogout = async (req, res) => {
+  try {
+    const accessToken = req.cookies.accessToken;
+    const findAccessTokenInBlackListModel = await BlackListModel.findOne({
+      accessToken,
+    });
+
+    if (findAccessTokenInBlackListModel) {
+      return res
+        .status(401)
+        .send({ status: "fail", msg: "you are already logged out" });
+    }
+
+    const saveAccessTokenInBlackListModel = new BlackListModel({ accessToken });
+    await saveAccessTokenInBlackListModel.save();
+    res.status(201).send({ status: "success", msg: "You are logged out" });
+  } catch (error) {
+    res.status(401).send({ status: "fail", msg: "error while logout user" });
+  }
+};
+
 const gitRegistration = async (req, res) => {
   // Get the code from the query parameters received from the GitHub OAuth redirect
   const { code } = req.query;
@@ -377,7 +401,6 @@ const requestForOtpToForgetPass = async (req, res) => {
         },
       }
     );
-    
 
     const subject = `Important: Your New OTP for E-learning forget password`;
 
@@ -427,6 +450,7 @@ const forgetPassword = async (req, res) => {
 module.exports = {
   userLogin,
   userRegister,
+  userLogout,
   userVerifyOTP,
   userResendOTP,
   gitRegistration,
