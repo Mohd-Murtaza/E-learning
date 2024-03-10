@@ -8,11 +8,13 @@ const {
   resetPassword,
   requestForOtpToForgetPass,
   forgetPassword,
+  userLogout,
 } = require("../controllers/user.controller");
 const userRouter = express.Router();
 
 userRouter.route("/login").post(userLogin);
 userRouter.route("/register").post(userRegister);
+userRouter.route("/logout").post(userLogout);
 userRouter.route("/verifyOtp").post(userVerifyOTP);
 userRouter.route("/resendOtp").post(userResendOTP);
 userRouter.route("/gitRegistration").get(gitRegistration);
