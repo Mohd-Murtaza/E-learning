@@ -1,5 +1,4 @@
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 const passport = require("passport");
 const { UserModel } = require("../models/user.model");
 const { v4: uuidv4 } = require("uuid");
@@ -17,13 +16,11 @@ passport.use(
       try {
         const email = profile._json.email;
         const name = profile._json.name;
-
         // Check if user with the same email already exists
         let existingUser = await UserModel.findOne({ email });
-
         if (existingUser) {
           // If user already exists, return that user
-          return done(null, existingUser);
+          return done(null, {existingUser});
         } else {
           // If user doesn't exist, create a new user
           const newUser = new UserModel({
@@ -33,7 +30,7 @@ passport.use(
             emailVerified: true,
           });
           await newUser.save();
-          return done(null, newUser);
+          return done(null, {newUser});
         }
       } catch (error) {
         return done(error);

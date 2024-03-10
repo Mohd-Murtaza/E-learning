@@ -205,13 +205,13 @@ const userLogin = async (req, res) => {
     const accesstoken = await findUserWithMail.generateAccessToken();
     const refreshtoken = await findUserWithMail.generateRefreshToken();
 
-    res.cookie("accesstoken", accesstoken, cookiesOption);
+    // res.cookie("accesstoken", accesstoken, cookiesOption);
     res.cookie("refreshtoken", refreshtoken, cookiesOption);
 
     //user is successfully login
     res
       .status(200)
-      .send({ status: "successfull", msg: "user is successfully login" });
+      .send({ status: "successfull", msg: "user is successfully login", accesstoken, refreshtoken });
   } catch (error) {
     res
       .status(400)
@@ -394,7 +394,6 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// to set user otp for forget password
 
 // send otp to user for forget password
 

@@ -5,6 +5,8 @@ const cookieParser = require("cookie-parser");
 const { connection } = require("./config/db");
 const { userRouter } = require("./routes/user.route");
 const { passport } = require("./config/googleOauth");
+const { generateAccessToken } = require("./middlewares/accessTokenGenerate.middleware");
+const { generateRefreshToken } = require("./middlewares/refreshTokenGenerator.middleware");
 
 const app = express();
 
@@ -28,13 +30,17 @@ app.get(
 
 app.get(
   "/google/callback",
+  generateAccessToken,
+  generateRefreshToken,
   passport.authenticate("google", {
     session: false,
 
     failureRedirect: "/google/failure",
   }),
   function (req, res) {
-    console.log(req.user);
+    console.log("line no 41")
+    console.log(generateAccessToken, generateRefreshToken),
+    console.log(req.user,req.cookies);
     res.redirect("/");
   }
 );
@@ -46,10 +52,19 @@ app.get("/google/failure", (req, res) => {
   res.send("google o auth failed");
 });
 
+//Google Oauth ends here
+
 // git intigration understandig purpose you can try  use(localhost:8080/login  in your browser)
 app.get("/login", (req, res) => {
-    res.sendFile(__dirname + "/index.html");
+  res.sendFile(__dirname + "/index.html");
 });
+
+app.use((req, res) => {
+  res.status(404).send("this is a invalid request");
+});
+
+
+
 
 app.listen(PORT, () => {
   connection
