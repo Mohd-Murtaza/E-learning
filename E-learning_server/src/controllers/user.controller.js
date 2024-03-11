@@ -180,7 +180,7 @@ const userLogin = async (req, res) => {
     const cookiesOption = {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "none"
     };
     //user login email is registered or not checking
     const findUserWithMail = await UserModel.findOne({ email });
@@ -205,8 +205,8 @@ const userLogin = async (req, res) => {
     const accesstoken = await findUserWithMail.generateAccessToken();
     const refreshtoken = await findUserWithMail.generateRefreshToken();
 
-    // res.cookie("accesstoken", accesstoken, cookiesOption);
-    res.cookie("refreshtoken", refreshtoken, cookiesOption);
+    res.cookie("accesstoken", accesstoken, cookiesOption, {maxAge:1 * 24 * 60 * 60 * 1000});
+    res.cookie("refreshtoken", refreshtoken, cookiesOption, {maxAge:7 * 24 * 60 * 60 * 1000});
 
     //user is successfully login
     res
@@ -223,9 +223,9 @@ const userLogin = async (req, res) => {
 
 const userLogout = async (req, res) => {
   try {
-    const accessToken = req.cookies.accessToken;
+    const accesstoken = req.cookies.accesstoken;
     const findAccessTokenInBlackListModel = await BlackListModel.findOne({
-      accessToken,
+      accesstoken,
     });
 
     if (findAccessTokenInBlackListModel) {
@@ -233,9 +233,9 @@ const userLogout = async (req, res) => {
         .status(401)
         .send({ status: "fail", msg: "you are already logged out" });
     }
-
-    const saveAccessTokenInBlackListModel = new BlackListModel({ accessToken });
+    const saveAccessTokenInBlackListModel = new BlackListModel({ accesstoken });
     await saveAccessTokenInBlackListModel.save();
+    res.clearCookie("accesstoken");
     res.status(201).send({ status: "success", msg: "You are logged out" });
   } catch (error) {
     res.status(401).send({ status: "fail", msg: "error while logout user" });
@@ -327,9 +327,9 @@ const gitRegistration = async (req, res) => {
     const accesstokenInGit = await alreadyUser.generateAccessToken();
     const refreshtokenInGit = await alreadyUser.generateRefreshToken();
 
-    res.cookie("accesstoken", accesstokenInGit, cookiesOption);
-    res.cookie("refreshtoken", refreshtokenInGit, cookiesOption);
-
+    res.cookie("accesstoken", accesstokenInGit, cookiesOption, {maxAge:1 * 24 * 60 * 60 * 1000});
+    res.cookie("refreshtoken", refreshtokenInGit, cookiesOption, {maxAge:7 * 24 * 60 * 60 * 1000});
+    console.log({accesstokenInGit,refreshtokenInGit})
       // If the user already exists, send a success message
       return res
         .status(200)
@@ -350,8 +350,8 @@ const gitRegistration = async (req, res) => {
     const accesstokenInGit = await newUser.generateAccessToken();
     const refreshtokenInGit = await newUser.generateRefreshToken();
 
-    res.cookie("accesstoken", accesstokenInGit, cookiesOption);
-    res.cookie("refreshtoken", refreshtokenInGit, cookiesOption);
+    res.cookie("accesstoken", accesstokenInGit);
+    res.cookie("refreshtoken", refreshtokenInGit);
       // Send a success message for the new user creation
       return res.status(201).send({
         status: "success",

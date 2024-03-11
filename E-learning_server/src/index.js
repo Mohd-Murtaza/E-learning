@@ -30,17 +30,16 @@ app.get(
 
 app.get(
   "/google/callback",
-  generateAccessToken,
-  generateRefreshToken,
   passport.authenticate("google", {
     session: false,
 
     failureRedirect: "/google/failure",
   }),
+  generateAccessToken,
   function (req, res) {
     console.log("line no 41")
     console.log(generateAccessToken, generateRefreshToken),
-    console.log(req.user,req.cookies);
+    console.log(req.user,req.cookies, "line  42 in index");
     res.redirect("/");
   }
 );
