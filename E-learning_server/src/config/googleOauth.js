@@ -20,7 +20,7 @@ passport.use(
         let existingUser = await UserModel.findOne({ email });
         if (existingUser) {
           // If user already exists, return that user
-          return done(null, {existingUser});
+          return done(null, existingUser);
         } else {
           // If user doesn't exist, create a new user
           const newUser = new UserModel({
@@ -30,7 +30,7 @@ passport.use(
             emailVerified: true,
           });
           await newUser.save();
-          return done(null, {newUser});
+          return done(null, newUser);
         }
       } catch (error) {
         return done(error);

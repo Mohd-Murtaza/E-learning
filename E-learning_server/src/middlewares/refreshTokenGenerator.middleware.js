@@ -3,15 +3,19 @@ const jwt=require('jsonwebtoken');
 
 const generateRefreshToken=(req,res,next)=>{
     try {
-        const {_id, email}= req.body;
+        const {_id, email}= req.user;
         const cookiesOptions={
             httpOnly:true,
             secure:true,
             sameSite:"none"
         }
-        const refreshtoken=jwt.sign({_id, email}, process.env.REFRESH_TOKEN_SECRET_KEY ,{expiresIn:process.env.REFRESH_TOKEN_EXPIRY});
+        const refreshtoken=jwt.sign(
+            {_id, email}, 
+            process.env.REFRESH_TOKEN_SECRET_KEY ,
+            {expiresIn:process.env.REFRESH_TOKEN_EXPIRY}
+        );
         if(refreshtoken){
-            res.cookie("refreshtoken",refreshtoken,cookiesOptions)
+            res.cookie("refreshtoken",refreshtoken,cookiesOptions, {maxAge:7 * 24 * 60 * 60 * 1000})
             next();
         }
     } catch (error) {

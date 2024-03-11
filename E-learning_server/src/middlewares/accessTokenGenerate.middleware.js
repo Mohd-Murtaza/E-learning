@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const generateAccessToken = (req, res, next) => {
   try {
-    const { _id, email } = req.body;
+    const { _id, email } = req.user;
     const cookiesOption = {
       httpOnly: true,
       secure: true,
@@ -16,9 +16,7 @@ const generateAccessToken = (req, res, next) => {
     );
     if (accesstoken) {
       // Set the cookie
-      console.log({accesstoken, accesstokenMiddleware:"line 19"})
-      res.cookie("accesstoken", accesstoken, cookiesOption);
-      console.log(req.cookies.accesstoken,"line 21")
+      res.cookie("accesstoken", accesstoken, cookiesOption,{maxAge:1 * 24 * 60 * 60 * 1000});
       next()
     }
   } catch (error) {
